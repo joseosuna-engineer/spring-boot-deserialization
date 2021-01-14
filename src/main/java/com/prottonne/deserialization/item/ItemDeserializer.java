@@ -5,10 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class ItemDeserializer extends StdDeserializer<Item> {
@@ -37,11 +35,9 @@ public class ItemDeserializer extends StdDeserializer<Item> {
 
         List<InnerItem> myList = new ArrayList<>();
 
-        if (myNode instanceof List) {
-            ArrayNode arrayNode = (ArrayNode) myNode;
-            Iterator<JsonNode> itr = arrayNode.elements();
-            while (itr.hasNext()) {
-                myList.add(getItem(itr.next()));
+        if (myNode.isArray()) {
+            for (final JsonNode oneElementNode : myNode) {
+                myList.add(getItem(oneElementNode));
             }
         } else {
             myList.add(getItem(myNode));
@@ -51,7 +47,8 @@ public class ItemDeserializer extends StdDeserializer<Item> {
     }
 
     private InnerItem getItem(JsonNode node) {
-        String data = node.get("attName").asText();
+        JsonNode dataNode = node.get("attrName");
+        String data = (null == dataNode) ? null : dataNode.asText();
         InnerItem innerItem = new InnerItem();
         innerItem.setData(data);
         return innerItem;
